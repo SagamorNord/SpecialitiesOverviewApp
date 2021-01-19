@@ -1,4 +1,4 @@
-package com.sagamore.testapplication
+package com.sagamore.testapplication.feature_details
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,6 +6,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import android.view.MenuItem
+import com.sagamore.testapplication.R
+import com.sagamore.testapplication.feature_main_list.ItemListActivity
 
 /**
  * An activity representing a single Item detail screen. This
@@ -42,8 +44,9 @@ class ItemDetailActivity : AppCompatActivity() {
             // using a fragment transaction.
             val fragment = ItemDetailFragment().apply {
                 arguments = Bundle().apply {
-                    putString(ItemDetailFragment.ARG_ITEM_ID,
-                            intent.getStringExtra(ItemDetailFragment.ARG_ITEM_ID))
+                    putSerializable(
+                        ItemDetailFragment.ARG_ITEM_ID,
+                            intent.getSerializableExtra(ItemDetailFragment.ARG_ITEM_ID))
                 }
             }
 
