@@ -54,7 +54,7 @@ class ItemListPresenter(private val view: ItemListView) {
 
         val apiService: ApiService = retrofit.create(ApiService::class.java)
 
-        val observable : Observable<EmployeeResponse> = apiService.loadList()
+        val observable: Observable<EmployeeResponse> = apiService.loadList()
         observable
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

@@ -9,5 +9,4 @@ interface ItemListView {
     fun onNotFound()
 
     fun onError(t: Throwable)
-
 }
