@@ -1,4 +1,4 @@
-package com.sagamore.testapplication
+package com.sagamore.testapplication.feature_main_list
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,7 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.sagamore.testapplication.dummy.DummyContent
+import com.sagamore.testapplication.R
+import com.sagamore.testapplication.feature_details.ItemDetailActivity
+import com.sagamore.testapplication.feature_details.ItemDetailFragment
+import com.sagamore.testapplication.service.data.EmployeeModel
 
 class SimpleItemRecyclerViewAdapter(
     private val parentActivity: ItemListActivity,
