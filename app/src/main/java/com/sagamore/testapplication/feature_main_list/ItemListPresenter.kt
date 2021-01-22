@@ -1,5 +1,6 @@
 package com.sagamore.testapplication.feature_main_list
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -7,8 +8,10 @@ import com.google.gson.GsonBuilder
 import com.sagamore.testapplication.service.ApiService
 import com.sagamore.testapplication.service.data.EmployeeModel
 import com.sagamore.testapplication.service.data.EmployeeResponse
+import com.sagamore.testapplication.service.data.SpecialtyModel
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -23,9 +26,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 class ItemListPresenter(private val view: ItemListView) {
 
     lateinit var retrofit: Retrofit
+    lateinit var apiService: ApiService
 
-    @RequiresApi(Build.VERSION_CODES.N)
-    fun loadEmployees() {
+    init {
         val logging = HttpLoggingInterceptor()
         logging.setLevel(HttpLoggingInterceptor.Level.BODY)
 
@@ -46,34 +49,63 @@ class ItemListPresenter(private val view: ItemListView) {
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
-
-        callEndpoints()
+        apiService = retrofit.create(ApiService::class.java)
     }
 
-    private fun callEndpoints() {
-
-        val apiService: ApiService = retrofit.create(ApiService::class.java)
+    @SuppressLint("CheckResult")
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun callEndpoints(): Observable<EmployeeModel>? {
 
         val observable: Observable<EmployeeResponse> = apiService.loadList()
-        observable
+
+        return observable
             .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
             .map { result -> result.employees }
-            .subscribe(this::handleResults, this::handleError);
+            .flatMap { list ->
+                Observable.fromIterable(list)
+            }
     }
 
+    @SuppressLint("CheckResult")
+    @RequiresApi(Build.VERSION_CODES.N)
+    internal fun loadSpecialities() {
+        val specialities = callEndpoints()
+            ?.map { item -> item.specialty }
+            ?.collectInto(arrayListOf(), { l: ArrayList<SpecialtyModel>, i -> l.addAll(i) })
+            ?.blockingGet()
 
-    private fun handleResults(marketList: List<EmployeeModel>) {
-        if (marketList.isNotEmpty()) {
-            view.onDataLoaded(marketList)
-        } else {
-            view.onNotFound()
-        }
+        val specialitiesSet = setOf(specialities)
+
+        Observable.fromIterable(specialitiesSet)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { list ->
+                    if (list?.isNotEmpty() == true) {
+                        list.distinctBy { it.specialty_id }
+                        view.onDataLoaded(list.distinctBy { it.specialty_id })
+                    } else {
+                        view.onNotFound()
+                    }
+                },
+                { throwable ->
+                    view.onError(throwable)
+                    Log.e("11111", "handleError: ${throwable.stackTrace}")
+                })
     }
 
-    private fun handleError(t: Throwable) {
-
-        view.onError(t)
-        Log.e("11111", "handleError: ${t.stackTrace}")
+    @SuppressLint("CheckResult")
+    @RequiresApi(Build.VERSION_CODES.N)
+    internal fun loadEmployees(specId: Int) {
+        callEndpoints()
+            ?.observeOn(AndroidSchedulers.mainThread())
+            ?.filter { model -> model.specialty[0].specialty_id == specId }
+            ?.collectInto(arrayListOf(), { l: ArrayList<EmployeeModel>, i -> l.add(i) })
+            ?.subscribe({
+                view.onEmployeeLoaded(it)
+            },
+                { throwable ->
+                    view.onError(throwable)
+                    Log.e("11111", "handleError: ${throwable.stackTrace}")
+                })
     }
 }

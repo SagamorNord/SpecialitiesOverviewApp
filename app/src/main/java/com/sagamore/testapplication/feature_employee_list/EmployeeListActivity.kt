@@ -1,5 +1,7 @@
-package com.sagamore.testapplication.feature_main_list
+package com.sagamore.testapplication.feature_employee_list
 
+import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -13,6 +15,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.sagamore.testapplication.R
+import com.sagamore.testapplication.feature_main_list.ItemListPresenter
+import com.sagamore.testapplication.feature_main_list.ItemListView
 import com.sagamore.testapplication.service.data.EmployeeModel
 import com.sagamore.testapplication.service.data.SpecialtyModel
 
@@ -25,7 +29,7 @@ import com.sagamore.testapplication.service.data.SpecialtyModel
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-class ItemListActivity : AppCompatActivity(), ItemListView {
+class EmployeeListActivity : AppCompatActivity(), ItemListView {
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -37,26 +41,25 @@ class ItemListActivity : AppCompatActivity(), ItemListView {
 
     private lateinit var recyclerView: RecyclerView
 
-    private var adapter = SimpleItemRecyclerViewAdapter(this, twoPane)
+    private var adapter = EmployeeAdapter(this, twoPane)
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_item_list)
+        setContentView(R.layout.activity_employee_list)
+        setSupportActionBar(findViewById(R.id.toolbar))
 
-        recyclerView = findViewById<View>(R.id.item_list) as RecyclerView
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        recyclerView = findViewById<View>(R.id.employee_list) as RecyclerView
         recyclerView.adapter = adapter
 
-        presenter.loadSpecialities()
+        val mode = intent.getIntExtra(SPEC_ID, DEFAULT_SPEC_ID)
+        presenter.loadEmployees(mode)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         toolbar.title = title
-
-        findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
-        }
 
         if (findViewById<NestedScrollView>(R.id.item_detail_container) != null) {
             // The detail container view will be present only in the
@@ -68,11 +71,11 @@ class ItemListActivity : AppCompatActivity(), ItemListView {
     }
 
     override fun onDataLoaded(list: List<SpecialtyModel>) {
-        adapter.setData(list)
+        Log.i("11111", "onDataLoaded: ")
     }
 
     override fun onEmployeeLoaded(list: List<EmployeeModel>) {
-        Log.i("11111", "onEmployeeLoaded: ")
+        adapter.setData(list)
     }
 
     override fun onNotFound() {
@@ -90,6 +93,12 @@ class ItemListActivity : AppCompatActivity(), ItemListView {
     }
 
     companion object {
-        const val BASE_URL = "https://gitlab.65apps.com/"
+        const val SPEC_ID = "speciality_id"
+        const val DEFAULT_SPEC_ID = 101
+
+        fun createIntent(context: Context, specialtyId: Int): Intent {
+            return Intent(context, EmployeeListActivity::class.java)
+                .putExtra(SPEC_ID, specialtyId)
+        }
     }
 }
