@@ -25,8 +25,8 @@ import retrofit2.converter.gson.GsonConverterFactory
  */
 class ItemListPresenter(private val view: ItemListView) {
 
-    lateinit var retrofit: Retrofit
-    lateinit var apiService: ApiService
+    var retrofit: Retrofit
+    var apiService: ApiService
 
     init {
         val logging = HttpLoggingInterceptor()

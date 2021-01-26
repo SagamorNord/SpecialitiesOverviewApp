@@ -10,31 +10,19 @@ import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
+import com.sagamore.testapplication.utils.convertDate
 import com.sagamore.testapplication.R
 import com.sagamore.testapplication.service.data.EmployeeModel
-import kotlinx.android.synthetic.main.activity_item_detail.*
-import kotlinx.android.synthetic.main.item_detail.*
+import com.sagamore.testapplication.utils.toStringWithPostfix
+import com.sagamore.testapplication.utils.stringFormatting
 import org.joda.time.LocalDate
 import org.joda.time.Years
 import org.joda.time.format.DateTimeFormat
 import java.util.regex.Pattern
 
-/**
- * A fragment representing a single Item detail screen.
- * This fragment is either contained in a [ItemListActivity]
- * in two-pane mode (on tablets) or a [ItemDetailActivity]
- * on handsets.
- */
 class ItemDetailFragment : Fragment() {
 
     private var item: EmployeeModel? = null
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        if (savedInstanceState != null) {
-            //Restore the fragment's state here
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,14 +49,13 @@ class ItemDetailFragment : Fragment() {
         val rootView = inflater.inflate(R.layout.item_detail, container, false)
 
         item?.let {
-            rootView.findViewById<TextView>(R.id.firstName).text = it.f_name
-            rootView.findViewById<TextView>(R.id.lastName).text = it.l_name
-            if (it.birthday.isNotBlank()) {
-                rootView.findViewById<TextView>(R.id.birthday).text = it.birthday
-            } else rootView.findViewById<TextView>(R.id.birthday).text = "-"
-
-            rootView.findViewById<TextView>(R.id.age).text = calculateAge(it.birthday)
-            rootView.findViewById<TextView>(R.id.speciality).text = it.specialty[0].name
+            rootView.apply {
+                findViewById<TextView>(R.id.firstName).text = it.f_name.stringFormatting()
+                findViewById<TextView>(R.id.lastName).text = it.l_name.stringFormatting()
+                findViewById<TextView>(R.id.birthday).text = convertDate(it.birthday, "dd.MM.yyyy")
+                findViewById<TextView>(R.id.age).text = calculateAge(it.birthday)
+                findViewById<TextView>(R.id.speciality).text = it.specialty[0].name
+            }
         }
 
         return rootView
@@ -76,15 +63,20 @@ class ItemDetailFragment : Fragment() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun calculateAge(birthDate: String): String {
-        return if (birthDate.isNotBlank()) {
+        return if (birthDate.isNullOrEmpty()) {
+            ""
+        } else {
             val date =
                 if (Pattern.matches(DATE_PATTERN_START_DAY, birthDate)) {
                     DATE_FORMAT_START_DAY.parseLocalDate(birthDate)
                 } else {
                     DATE_FORMAT_START_YEAR.parseLocalDate(birthDate)
                 }
-            Years.yearsBetween(date, LocalDate.now()).years.toString()
-        } else ""
+            Years
+                .yearsBetween(date, LocalDate.now())
+                .years
+                .toStringWithPostfix()
+        }
     }
 
     companion object {

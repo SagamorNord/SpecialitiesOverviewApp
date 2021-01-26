@@ -10,10 +10,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.sagamore.testapplication.utils.convertDate
 import com.sagamore.testapplication.R
 import com.sagamore.testapplication.feature_details.ItemDetailActivity
 import com.sagamore.testapplication.feature_details.ItemDetailFragment
 import com.sagamore.testapplication.service.data.EmployeeModel
+import com.sagamore.testapplication.utils.stringFormatting
 
 /**
  * @author a.v.davtyan
@@ -56,26 +58,21 @@ class EmployeeAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.employee_list_content, parent, false)
+            .inflate(R.layout.employee_card, parent, false)
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = employees[position]
         holder.apply {
-            firstName.text = item.f_name
-            lastName.text = item.l_name
+            firstName.text = item.f_name.stringFormatting()
+            lastName.text = item.l_name.stringFormatting()
             Glide.with(holder.icon)
                 .load(item.avatr_url)
                 .into(holder.icon)
-            birthday.text = item.birthday
+            birthday.text = convertDate(item.birthday, "dd.MM.yyyy")
         }
-//        holder.firstName.text = item.f_name
-//        holder.lastName.text = item.l_name
-//        Glide.with(holder.icon)
-//            .load(item.avatr_url)
-//            .into(holder.icon)
-//        holder.birthday.text = item.birthday
+
         with(holder.itemView) {
             tag = item
             setOnClickListener(onClickListener)

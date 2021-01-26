@@ -5,7 +5,7 @@
     android:id="@+id/employee_list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginHorizontal="8dp"
+    android:layout_marginHorizontal="16dp"
     app:layoutManager="LinearLayoutManager"
     tools:context=".feature_employee_list.EmployeeListActivity"
-    tools:listitem="@layout/employee_list_content" />
+    tools:listitem="@layout/employee_card" />
